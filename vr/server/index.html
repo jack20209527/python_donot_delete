@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动化管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            900: '#0a0a0f',
+                            800: '#12121a',
+                            700: '#1a1a25',
+                            600: '#22222f',
+                            500: '#2a2a3a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
+        }
+        .glow-blue:hover {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+        }
+        .glow-purple:hover {
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+        }
+        .glow-cyan:hover {
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.4);
+        }
+        .glow-orange:hover {
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+        }
+        /* 日志容器滚动条样式 */
+        #logContainer::-webkit-scrollbar {
+            width: 8px;
+        }
+        #logContainer::-webkit-scrollbar-track {
+            background: #1a1a25;
+            border-radius: 4px;
+        }
+        #logContainer::-webkit-scrollbar-thumb {
+            background: #3b3b4f;
+            border-radius: 4px;
+        }
+        #logContainer::-webkit-scrollbar-thumb:hover {
+            background: #4b4b5f;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+
+<!-- 导航栏 -->
+<nav class="fixed top-0 left-0 right-0 h-16 bg-dark-900/80 backdrop-blur-xl border-b border-dark-500 flex items-center justify-between px-8 z-50">
+    <!-- 左侧 Logo -->
+    <div class="flex items-center gap-3">
+        <i class="fas fa-robot text-2xl bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent"></i>
+        <span class="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">AutoDeploy</span>
+    </div>
+
+    <!-- 中间导航 -->
+    <div class="flex gap-2">
+        <a href="#deploy" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-dark-700 transition-all">部署中心</a>
+        <a href="#config" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-dark-700 transition-all">配置管理</a>
+        <a href="#logs" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-dark-700 transition-all">日志查看</a>
+    </div>
+
+    <!-- 右侧用户 -->
+    <div class="flex items-center gap-3 text-gray-400">
+        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+        <span class="text-sm">在线</span>
+        <i class="fas fa-user-circle text-2xl text-purple-500 cursor-pointer hover:text-purple-400 transition-colors"></i>
+    </div>
+</nav>
+
+<!-- 主内容 -->
+<main class="pt-24 px-8 pb-8 max-w-6xl mx-auto">
+
+    <!-- 部署区域 -->
+    <section id="deploy" class="mb-8">
+        <div class="bg-dark-700 border border-dark-500 rounded-2xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-dark-500 flex items-center gap-3">
+                <i class="fas fa-rocket text-purple-500"></i>
+                <h2 class="text-lg font-semibold">部署管理</h2>
+            </div>
+            <div class="p-6 flex gap-4">
+                <button onclick="handleAction('deployIntegration')"
+                        class="flex-1 py-4 px-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl font-semibold
+                                   hover:from-blue-500 hover:to-purple-500 transition-all duration-300 glow-purple
+                                   flex items-center justify-center gap-3">
+                    <i class="fas fa-layer-group"></i>
+                    部署集成版本
+                </button>
+                <button onclick="handleAction('deployLauncher')"
+                        class="flex-1 py-4 px-6 bg-dark-600 border border-dark-500 rounded-xl font-semibold
+                                   hover:border-purple-500 hover:bg-dark-500 transition-all duration-300
+                                   flex items-center justify-center gap-3">
+                    <i class="fas fa-play-circle"></i>
+                    部署 Launcher 版本
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Launcher 配置区域 -->
+    <section id="config" class="mb-8">
+        <div class="bg-dark-700 border border-dark-500 rounded-2xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-dark-500 flex items-center gap-3">
+                <i class="fas fa-cog text-cyan-500"></i>
+                <h2 class="text-lg font-semibold">Launcher 配置</h2>
+            </div>
+            <div class="p-6 flex gap-4">
+                <button onclick="handleAction('getConfig')"
+                        class="flex-1 py-4 px-6 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-xl font-semibold
+                                   hover:from-cyan-500 hover:to-blue-500 transition-all duration-300 glow-cyan
+                                   flex items-center justify-center gap-3">
+                    <i class="fas fa-download"></i>
+                    获取 Launcher 配置
+                </button>
+                <button onclick="handleAction('setConfig')"
+                        class="flex-1 py-4 px-6 bg-gradient-to-r from-orange-600 to-amber-600 rounded-xl font-semibold
+                                   hover:from-orange-500 hover:to-amber-500 transition-all duration-300 glow-orange
+                                   flex items-center justify-center gap-3">
+                    <i class="fas fa-upload"></i>
+                    设置 Launcher 配置
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 日志区域 -->
+    <section id="logs">
+        <div class="bg-dark-700 border border-dark-500 rounded-2xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-dark-500 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-terminal text-green-500"></i>
+                    <h2 class="text-lg font-semibold">运行日志</h2>
+                    <span id="logCount" class="text-xs text-gray-500 bg-dark-600 px-2 py-1 rounded">0 条</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+                        <input type="checkbox" id="autoScroll" checked class="rounded">
+                        <span>自动滚动</span>
+                    </label>
+                    <button onclick="clearLogs()" class="text-gray-500 hover:text-white transition-colors" title="清空日志">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="logContainer" class="p-4 h-80 overflow-y-auto font-mono text-sm space-y-1 bg-dark-800">
+                <!-- 日志内容会动态填充 -->
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script>
+        const API_BASE = '';  // 同源，不需要指定域名
+        let logPollingTimer = null;
+        let lastLogCount = 0;
+
+        // 页面加载时开始轮询日志
+        window.onload = function() {
+            startLogPolling();
+        };
+
+        // 开始轮询日志
+        function startLogPolling() {
+            fetchLogs();  // 立即获取一次
+            logPollingTimer = setInterval(fetchLogs, 500);  // 每 500ms 刷新一次，更实时
+        }
+
+        // 获取日志
+        async function fetchLogs() {
+            try {
+                const response = await fetch(`${API_BASE}/api/logs`);
+                const data = await response.json();
+                renderLogs(data.logs);
+            } catch (error) {
+                console.error('获取日志失败:', error);
+            }
+        }
+
+        // 渲染日志
+        function renderLogs(logs) {
+            const container = document.getElementById('logContainer');
+            const logCountEl = document.getElementById('logCount');
+            const autoScroll = document.getElementById('autoScroll').checked;
+
+            // 更新日志数量
+            logCountEl.textContent = `${logs.length} 条`;
+
+            // 如果日志数量没变，不重新渲染
+            if (logs.length === lastLogCount) {
+                return;
+            }
+            lastLogCount = logs.length;
+
+            // 清空并重新渲染
+            container.innerHTML = '';
+
+            if (logs.length === 0) {
+                const emptyLine = document.createElement('div');
+                emptyLine.className = 'text-gray-500';
+                emptyLine.textContent = '暂无日志，等待操作...';
+                container.appendChild(emptyLine);
+                return;
+            }
+
+            logs.forEach(log => {
+                const colorClass = {
+                    info: 'text-cyan-400',
+                    success: 'text-green-400',
+                    warning: 'text-orange-400',
+                    error: 'text-red-400'
+                }[log.level] || 'text-gray-400';
+
+                const line = document.createElement('div');
+                line.className = `${colorClass} leading-relaxed`;
+                line.textContent = `[${log.time}] ${log.message}`;
+                container.appendChild(line);
+            });
+
+            // 自动滚动到底部
+            if (autoScroll) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        // 操作处理
+        async function handleAction(action) {
+            const apiMap = {
+                deployIntegration: { url: '/api/deploy/integration', method: 'POST', name: '部署集成版本' },
+                deployLauncher: { url: '/api/deploy/launcher', method: 'POST', name: '部署 Launcher' },
+                getConfig: { url: '/api/config/get', method: 'GET', name: '获取配置' },
+                setConfig: { url: '/api/config/set', method: 'POST', name: '设置配置' }
+            };
+
+            const config = apiMap[action];
+            if (!config) return;
+
+            try {
+                const options = { method: config.method };
+                if (config.method === 'POST' && action === 'setConfig') {
+                    options.headers = { 'Content-Type': 'application/json' };
+                    options.body = JSON.stringify({ test: 'config' });
+                }
+
+                const response = await fetch(`${API_BASE}${config.url}`, options);
+                const data = await response.json();
+                console.log(`${config.name} 响应:`, data);
+            } catch (error) {
+                console.error(`${config.name} 失败:`, error);
+            }
+        }
+
+        // 清空日志
+        async function clearLogs() {
+            try {
+                await fetch(`${API_BASE}/api/logs/clear`, { method: 'POST' });
+                lastLogCount = 0;  // 重置计数，强制刷新
+                fetchLogs();  // 立即刷新
+            } catch (error) {
+                console.error('清空日志失败:', error);
+            }
+        }
+    </script>
+
+</body>
+</html>
