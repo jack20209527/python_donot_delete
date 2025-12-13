@@ -28,18 +28,12 @@ from utils.FileUtils import (
 
 # ==================== 配置路径 ====================
 # 原有库的父目录
-original_library_dir = "/Users/sun2022/Downloads/local_android/yzandroid/"
+original_library_dir = "/Users/sun2022/pro/pico_pro/android_uniapp/android_shilong_v3/"
 # 原有的 unityLibrary 路径
-original_library_path = "/Users/sun2022/Downloads/local_android/yzandroid/unityLibrary"
+original_library_path = "/Users/sun2022/pro/pico_pro/android_uniapp/android_shilong_v3/unityLibrary"
 
 # 新生成的 unityLibrary 路径
 new_library_path = "/Users/sun2022/pro/pro_android_unity/yzgame/yzgame/good1/unityLibrary"
-
-# ==================== build.gradle 需要注释的行（包含这些关键字的行会被注释掉） ====================
-GRADLE_COMMENT_KEYWORDS = [
-    "--profiler-report",
-    "--profiler-output-file=",
-]
 # ==================================================
 
 
@@ -143,51 +137,6 @@ def extract_content_after_first_android_block(gradle_content: str) -> str:
 
     # 返回闭合 } 之后的内容
     return gradle_content[end_pos + 1:]
-
-
-def comment_lines_with_keywords(content: str, keywords: list) -> tuple:
-    """
-    遍历内容的每一行，如果该行包含指定关键字列表中的任意一个，则注释掉该行。
-
-    参数:
-        content (str): 文件内容
-        keywords (list): 需要匹配的关键字列表
-
-    返回:
-        tuple: (处理后的内容, 被注释的行数)
-    """
-    lines = content.split('\n')
-    result_lines = []
-    commented_count = 0
-
-    for line in lines:
-        # 检查该行是否已经被注释（以 // 开头，忽略前导空白）
-        stripped_line = line.strip()
-        is_already_commented = stripped_line.startswith('//')
-
-        # 检查该行是否包含任意一个关键字
-        should_comment = False
-        matched_keyword = None
-
-        if not is_already_commented:
-            for keyword in keywords:
-                if keyword in line:
-                    should_comment = True
-                    matched_keyword = keyword
-                    break
-
-        if should_comment:
-            # 保持原有缩进，在内容前加 //
-            # 找到第一个非空白字符的位置
-            leading_whitespace = len(line) - len(line.lstrip())
-            commented_line = line[:leading_whitespace] + '//' + line[leading_whitespace:]
-            result_lines.append(commented_line)
-            commented_count += 1
-            print(f"  📝 注释行 (匹配 '{matched_keyword}'): {stripped_line[:60]}...")
-        else:
-            result_lines.append(line)
-
-    return '\n'.join(result_lines), commented_count
 
 
 def comment_activity_block(manifest_content: str) -> str:
@@ -324,8 +273,7 @@ def step3_clean_libs_folder() -> bool:
 def step4_merge_build_gradle(unity_library2_path: str) -> bool:
     """
     步骤4: 合并 build.gradle 文件
-    将旧库（unityLibrary2）的 android{} 闭包及以上的代码替换到新库（unityLibrary）中，
-    并注释掉包含指定关键字的行。
+    将旧库（unityLibrary2）的 android{} 闭包及以上的代码替换到新库（unityLibrary）中
 
     参数:
         unity_library2_path (str): unityLibrary2 的路径
@@ -341,7 +289,6 @@ def step4_merge_build_gradle(unity_library2_path: str) -> bool:
 
     log_info(f"旧 build.gradle: {old_gradle_path}")
     log_info(f"新 build.gradle: {new_gradle_path}")
-    log_info(f"需要注释的关键字: {GRADLE_COMMENT_KEYWORDS}")
 
     # 检查文件是否存在
     if not os.path.exists(old_gradle_path):
@@ -377,16 +324,6 @@ def step4_merge_build_gradle(unity_library2_path: str) -> bool:
 
         # 合并：旧的头部和android闭包 + 新的android闭包之后的内容
         merged_content = old_header_and_android + new_after_android
-
-        log_info("开始处理需要注释的行...")
-
-        # 注释掉包含指定关键字的行
-        merged_content, commented_count = comment_lines_with_keywords(merged_content, GRADLE_COMMENT_KEYWORDS)
-
-        if commented_count > 0:
-            log_info(f"共注释了 {commented_count} 行")
-        else:
-            log_info("没有找到需要注释的行")
 
         # 写入新 build.gradle
         with open(new_gradle_path, 'w', encoding='utf-8') as f:
@@ -520,7 +457,6 @@ def main():
     print(f"   原有库父目录: {original_library_dir}")
     print(f"   原有库路径: {original_library_path}")
     print(f"   新库路径: {new_library_path}")
-    print(f"   build.gradle 注释关键字: {GRADLE_COMMENT_KEYWORDS}")
 
     # 步骤1: 重命名原有库
     unity_library2_path = step1_rename_original_library()
@@ -560,7 +496,7 @@ def main():
     print(f"   ✅ 原有库已备份为: {unity_library2_path}")
     print(f"   ✅ 新库已部署到: {os.path.join(original_library_dir, 'unityLibrary')}")
     print(f"   ✅ 已清空 libs 文件夹")
-    print(f"   ✅ 已合并 build.gradle 文件（并注释指定行）")
+    print(f"   ✅ 已合并 build.gradle 文件")
     print(f"   ✅ 已注释 AndroidManifest.xml 中的 <activity> 标签")
     print(f"   ✅ 已替换 com 包内容")
 
