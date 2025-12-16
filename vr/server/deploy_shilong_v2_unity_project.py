@@ -28,9 +28,15 @@ from utils.FileUtils import (
 
 # ==================== 配置路径 ====================
 # 原有库的父目录
-original_library_dir = "/Users/sun2022/Downloads/local_android/yzandroid/"
+# original_library_dir = "/Users/sun2022/Downloads/local_android/yzandroid/"
+# # 原有的 unityLibrary 路径
+# original_library_path = "/Users/sun2022/Downloads/local_android/yzandroid/unityLibrary"
+
+
+original_library_dir = "/Users/sun2022/pro/pico_pro/android_uniapp/android_shilong_v6/"
 # 原有的 unityLibrary 路径
-original_library_path = "/Users/sun2022/Downloads/local_android/yzandroid/unityLibrary"
+original_library_path = "/Users/sun2022/pro/pico_pro/android_uniapp/android_shilong_v6/unityLibrary"
+
 
 # 新生成的 unityLibrary 路径
 new_library_path = "/Users/sun2022/pro/pro_android_unity/yzgame/yzgame/good1/unityLibrary"
