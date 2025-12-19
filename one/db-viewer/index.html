@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据库查看工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .table-container {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .table-header {
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 10;
+        }
+        .table-header th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: white;
+            border-right: 1px solid rgba(255,255,255,0.2);
+            white-space: nowrap;
+        }
+        .table-header th:last-child {
+            border-right: none;
+        }
+        .table-row {
+            border-bottom: 2px solid #e5e7eb;
+            transition: background-color 0.2s;
+        }
+        .table-row:hover {
+            background-color: #f9fafb;
+        }
+        .table-row td {
+            padding: 12px;
+            border-right: 1px solid #e5e7eb;
+            word-break: break-word;
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .table-row td:last-child {
+            border-right: none;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-message {
+            background-color: #fee;
+            border-left: 4px solid #f44;
+            padding: 12px;
+            border-radius: 4px;
+            color: #c33;
+        }
+        .success-message {
+            background-color: #efe;
+            border-left: 4px solid #4f4;
+            padding: 12px;
+            border-radius: 4px;
+            color: #3a3;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- 标题 -->
+            <div class="mb-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">📊 数据库查看工具</h1>
+                <p class="text-gray-600">数据库: my_web_common</p>
+            </div>
+
+            <!-- 控制面板 -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <!-- 表选择 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">选择数据表</label>
+                        <select id="tableSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <option value="">加载中...</option>
+                        </select>
+                    </div>
+
+                    <!-- 行数输入 -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">查询行数</label>
+                        <input type="number" id="limitInput" value="1000" min="1" max="10000" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+
+                    <!-- 查询按钮 -->
+                    <div class="flex items-end">
+                        <button id="queryBtn" class="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                            <span>🔍 查询数据</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 状态信息 -->
+                <div id="statusContainer" class="hidden"></div>
+            </div>
+
+            <!-- 数据表 -->
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div id="tableContainer" class="table-container">
+                    <table class="w-full">
+                        <thead class="table-header">
+                            <tr id="headerRow">
+                                <th>加载中...</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td class="p-8 text-center text-gray-500">请选择表并点击查询按钮</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 数据统计 -->
+            <div id="statsContainer" class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 hidden">
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-600 text-sm">显示行数</p>
+                    <p class="text-3xl font-bold text-purple-600" id="rowCount">0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-600 text-sm">字段数</p>
+                    <p class="text-3xl font-bold text-purple-600" id="colCount">0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <p class="text-gray-600 text-sm">查询耗时</p>
+                    <p class="text-3xl font-bold text-purple-600" id="queryTime">0ms</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
