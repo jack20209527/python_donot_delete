@@ -4,7 +4,6 @@
 """
 数据库查看工具 - Flask Web 服务
 连接腾讯云 MySQL 数据库，提供 Web 界面查看表数据
-修复版本：确保返回正确行数，所有表倒序输出
 """
 
 from flask import Flask, jsonify, request, send_from_directory
@@ -13,7 +12,6 @@ import pymysql
 from pymysql import Error
 import json
 from datetime import datetime
-import time
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
@@ -32,7 +30,7 @@ DB_CONFIG = {
 # ==================== 全局缓存 ====================
 cache = {
     'tables': [],
-    'table_columns': {},  # 存储每个表的列信息
+    'table_data': {},
     'connected': False,
     'error_message': ''
 }
@@ -61,39 +59,6 @@ def log_warning(message: str):
 
 # ==================== 数据库初始化 ====================
 
-def get_order_by_column(table_name, cursor):
-    """
-    智能获取排序字段
-    优先使用：id DESC, create_at DESC, update_at DESC, create_time DESC
-    """
-    try:
-        # 获取表结构
-        cursor.execute(f"DESCRIBE {table_name}")
-        columns_info = cursor.fetchall()
-
-        # 提取列名
-        if isinstance(columns_info[0], dict):
-            columns = [col['Field'] for col in columns_info]
-        else:
-            columns = [col[0] for col in columns_info]
-
-        # 优先级顺序查找排序字段
-        priority_fields = ['id', 'create_at', 'update_at', 'create_time', 'update_time', 'created_at', 'updated_at']
-
-        for field in priority_fields:
-            if field in columns:
-                return f"{field} DESC"
-
-        # 如果都没有，使用第一个字段倒序
-        if columns:
-            return f"{columns[0]} DESC"
-
-        return None
-    except Exception as e:
-        log_warning(f"获取排序字段失败: {e}")
-        return None
-
-
 def init_database():
     """初始化数据库连接和缓存"""
     try:
@@ -101,58 +66,86 @@ def init_database():
         log_info(f"服务器: {DB_CONFIG['host']}:{DB_CONFIG['port']}")
         log_info(f"用户: {DB_CONFIG['user']}")
         log_info(f"数据库: {DB_CONFIG['database']}")
-
+        
         # 建立连接
         connection = pymysql.connect(**DB_CONFIG)
         log_success("数据库连接成功！")
-
+        
         # 创建游标
         cursor = connection.cursor()
-
+        
         # 获取所有表
         cursor.execute("SHOW TABLES")
         tables = cursor.fetchall()
-
+        
         # 提取表名
         if isinstance(tables[0], dict):
+            # DictCursor 返回字典
             table_names = [list(table.values())[0] for table in tables]
         else:
+            # 普通游标返回元组
             table_names = [table[0] for table in tables]
-
+        
         cache['tables'] = table_names
-
+        
         log_success(f"找到 {len(cache['tables'])} 个表: {', '.join(cache['tables'])}")
-
-        # 预加载每个表的列信息（不预加载数据，改为实时查询）
+        
+        # 预加载每个表的数据（前1000行）
         for table in cache['tables']:
             try:
                 # 获取表结构
                 cursor.execute(f"DESCRIBE {table}")
                 columns_info = cursor.fetchall()
-
+                
                 if isinstance(columns_info[0], dict):
+                    # DictCursor
                     columns = [col['Field'] for col in columns_info]
                 else:
+                    # 普通游标
                     columns = [col[0] for col in columns_info]
-
-                # 获取排序字段
-                order_by = get_order_by_column(table, cursor)
-
-                cache['table_columns'][table] = {
+                
+                # 查询表数据
+                cursor.execute(f"SELECT * FROM {table} LIMIT 1000")
+                rows = cursor.fetchall()
+                
+                # 转换为字典列表（处理日期时间对象）
+                data = []
+                for row in rows:
+                    if isinstance(row, dict):
+                        # DictCursor 已经是字典
+                        row_dict = {}
+                        for key, value in row.items():
+                            if isinstance(value, datetime):
+                                row_dict[key] = value.isoformat()
+                            else:
+                                row_dict[key] = value
+                        data.append(row_dict)
+                    else:
+                        # 普通游标需要转换
+                        row_dict = {}
+                        for i, col in enumerate(columns):
+                            value = row[i]
+                            if isinstance(value, datetime):
+                                row_dict[col] = value.isoformat()
+                            else:
+                                row_dict[col] = value
+                        data.append(row_dict)
+                
+                cache['table_data'][table] = {
                     'columns': columns,
-                    'order_by': order_by
+                    'data': data,
+                    'count': len(data)
                 }
-
-                log_success(f"表 '{table}' 列信息已加载 ({len(columns)} 列)")
-
+                log_success(f"表 '{table}' 已加载 ({len(data)} 行)")
+                
             except Error as e:
-                log_error(f"表 '{table}' 列信息加载失败: {e}")
-
+                log_error(f"表 '{table}' 加载失败: {e}")
+        
         cursor.close()
         connection.close()
         cache['connected'] = True
-        log_success("数据库初始化完成")
-
+        log_success("所有数据已缓存到内存")
+        
     except Error as e:
         error_msg = f"数据库连接失败: {e}"
         log_error(error_msg)
@@ -194,7 +187,7 @@ def get_tables():
             'error': '数据库未连接',
             'details': cache['error_message']
         }), 500
-
+    
     return jsonify({
         'success': True,
         'tables': cache['tables'],
@@ -204,137 +197,63 @@ def get_tables():
 
 @app.route('/api/query', methods=['POST'])
 def query_data():
-    """
-    查询表数据 - 修复版本
-    1. 实时查询数据库（不使用缓存数据）
-    2. 按倒序排序（最新的在前）
-    3. 返回正确的行数（如果不足就全部返回）
-    """
+    """查询表数据"""
     if not cache['connected']:
         return jsonify({
             'success': False,
             'error': '数据库未连接',
             'details': cache['error_message']
         }), 500
-
-    start_time = time.time()
-
+    
     try:
         data = request.get_json()
         table = data.get('table')
         limit = data.get('limit', 1000)
-
+        
         # 验证输入
         if not table or not isinstance(table, str):
             return jsonify({
                 'success': False,
                 'error': '无效的表名'
             }), 400
-
+        
         if not isinstance(limit, int) or limit < 1 or limit > 10000:
             return jsonify({
                 'success': False,
                 'error': '行数必须在 1-10000 之间'
             }), 400
-
+        
         # 防止 SQL 注入 - 只允许字母、数字、下划线
         if not all(c.isalnum() or c == '_' for c in table):
             return jsonify({
                 'success': False,
                 'error': '表名包含无效字符'
             }), 400
-
-        # 检查表是否存在
-        if table not in cache['table_columns']:
+        
+        # 从缓存获取数据
+        if table not in cache['table_data']:
             return jsonify({
                 'success': False,
                 'error': f'表 {table} 不存在'
             }), 404
-
-        # 获取表的列信息和排序字段
-        table_info = cache['table_columns'][table]
+        
+        table_info = cache['table_data'][table]
         columns = table_info['columns']
-        order_by = table_info.get('order_by')
-
-        # 构建 SQL 查询语句
-        if order_by:
-            # 有排序字段，使用倒序
-            sql = f"SELECT * FROM `{table}` ORDER BY {order_by} LIMIT {limit}"
-        else:
-            # 没有排序字段，直接限制数量（MySQL 默认顺序）
-            sql = f"SELECT * FROM `{table}` LIMIT {limit}"
-
-        log_info(f"执行查询: {sql}")
-
-        # 实时查询数据库
-        connection = None
-        cursor = None
-        try:
-            connection = pymysql.connect(**DB_CONFIG)
-            cursor = connection.cursor()
-
-            # 执行查询
-            cursor.execute(sql)
-            rows = cursor.fetchall()
-
-            # 转换为字典列表（处理日期时间对象）
-            data_list = []
-            for row in rows:
-                if isinstance(row, dict):
-                    # DictCursor 已经是字典
-                    row_dict = {}
-                    for key, value in row.items():
-                        if isinstance(value, datetime):
-                            row_dict[key] = value.isoformat()
-                        elif isinstance(value, (bytes, bytearray)):
-                            # 处理二进制数据
-                            row_dict[key] = value.hex() if value else None
-                        else:
-                            row_dict[key] = value
-                    data_list.append(row_dict)
-                else:
-                    # 普通游标需要转换
-                    row_dict = {}
-                    for i, col in enumerate(columns):
-                        value = row[i]
-                        if isinstance(value, datetime):
-                            row_dict[col] = value.isoformat()
-                        elif isinstance(value, (bytes, bytearray)):
-                            row_dict[col] = value.hex() if value else None
-                        else:
-                            row_dict[col] = value
-                    data_list.append(row_dict)
-
-            # 计算查询耗时
-            query_time = int((time.time() - start_time) * 1000)
-
-            log_success(f"查询成功: 表={table}, 返回行数={len(data_list)}, 耗时={query_time}ms")
-
-            return jsonify({
-                'success': True,
-                'columns': columns,
-                'data': data_list,
-                'returned': len(data_list),
-                'requested': limit,
-                'query_time': query_time
-            })
-
-        except Error as e:
-            log_error(f"数据库查询失败: {e}")
-            return jsonify({
-                'success': False,
-                'error': f'数据库查询失败: {str(e)}'
-            }), 500
-        finally:
-            if cursor:
-                cursor.close()
-            if connection:
-                connection.close()
-
+        all_data = table_info['data']
+        
+        # 返回指定数量的数据
+        limited_data = all_data[:limit]
+        
+        return jsonify({
+            'success': True,
+            'columns': columns,
+            'data': limited_data,
+            'total': len(all_data),
+            'returned': len(limited_data)
+        })
+        
     except Exception as e:
         log_error(f"查询失败: {e}")
-        import traceback
-        traceback.print_exc()
         return jsonify({
             'success': False,
             'error': str(e)
@@ -360,39 +279,21 @@ def get_table_info(table_name):
             'success': False,
             'error': '数据库未连接'
         }), 500
-
-    if table_name not in cache['table_columns']:
+    
+    if table_name not in cache['table_data']:
         return jsonify({
             'success': False,
             'error': f'表 {table_name} 不存在'
         }), 404
-
-    table_info = cache['table_columns'][table_name]
-
-    # 获取实际行数
-    connection = None
-    cursor = None
-    try:
-        connection = pymysql.connect(**DB_CONFIG)
-        cursor = connection.cursor()
-        cursor.execute(f"SELECT COUNT(*) as count FROM `{table_name}`")
-        result = cursor.fetchone()
-        row_count = result['count'] if isinstance(result, dict) else result[0]
-    except:
-        row_count = 0
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-
+    
+    table_info = cache['table_data'][table_name]
+    
     return jsonify({
         'success': True,
         'table': table_name,
         'columns': table_info['columns'],
-        'row_count': row_count,
-        'column_count': len(table_info['columns']),
-        'order_by': table_info.get('order_by', '无')
+        'row_count': table_info['count'],
+        'column_count': len(table_info['columns'])
     })
 
 
@@ -422,24 +323,18 @@ if __name__ == '__main__':
     print("\n" + "="*60)
     print("🚀 数据库查看工具启动中...")
     print("="*60)
-
+    
     # 初始化数据库
     init_database()
-
+    
     print("\n" + "="*60)
     if cache['connected']:
         print("✓ 服务器启动在 http://localhost:8888")
         print("✓ 打开浏览器访问: http://localhost:8888")
-        print("✓ 修复说明:")
-        print("  - 所有表数据按倒序输出（最新的在前）")
-        print("  - 实时查询数据库，返回正确的行数")
-        print("  - 如果数据不足，返回全部数据")
     else:
         print("✗ 数据库连接失败，请检查配置")
         print(f"✗ 错误信息: {cache['error_message']}")
     print("="*60 + "\n")
-
+    
     # 启动 Flask 服务
     app.run(host='localhost', port=8888, debug=False)
-
-
