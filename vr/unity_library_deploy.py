@@ -10,7 +10,7 @@ Unity Library 部署脚本
 1. 重命名原有的 unityLibrary 为 unityLibrary2（备份）
 2. 拷贝新的 unityLibrary 到目标目录
 3. 整理libs文件:
-    (1)在新拷贝过来的的unityLibrary中，删除unitylibrary-debug.aar
+    (1)在新拷贝过来的的unityLibrary中，删除unitylibrary-debug.aar和rtmp-client-3.2.0.aar
     (2)保留unity-classes.jar不动
     (3)剪切其余的jar文件和aar文件到我给你的original_app_libs_dir这个变量指定的目录下，也就是可以先给original_app_libs_dir路径下的你需要剪切的文件删除，再给需要剪切的文件拷贝过来
 4. 给 library2 中的 build.gradle的全部内容 整体拷贝到 library中的build.gradle文件中
@@ -219,7 +219,7 @@ def step3_organize_libs_folder() -> bool:
         # 需要保留的文件
         keep_files = ["unity-classes.jar"]
         # 需要删除的文件
-        delete_files = ["unitylibrary-debug.aar"]
+        delete_files = ["unitylibrary-debug.aar", "rtmp-client-3.2.0.aar"]
         # 需要剪切的文件类型
         cut_extensions = [".jar", ".aar"]
 

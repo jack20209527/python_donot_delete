@@ -182,8 +182,10 @@ if __name__ == "__main__":
     # 2.这个launcher，就是对应服务器上的文件名，获取的时候，后边加上launcher就行了，因为这个配置文件中配置的文件名就是launcher
     #   https://linkprohub.top/vr/get_config?name=launcher
     #   https://linkprohub.top/vr/get_config?name=tester
+    #   https://linkprohub.top/vr/get_config?name=select_scence
 
     # config_name = "launcher"
-    config_name = "tester"
+    # config_name = "tester"
+    config_name = "select_scence"
     set_config(config_name)
     # get_config(config_name)
