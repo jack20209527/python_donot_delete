@@ -36,6 +36,13 @@ CONFIG_DATA = {
             "ext0": "",
             "ext1": "",
             "ext2": ""
+        },
+        {
+            "id": 3,
+            "name": "SpaceVideoPLayer_new_ui",
+            "ext0": "",
+            "ext1": "",
+            "ext2": ""
         }
     ]
 }

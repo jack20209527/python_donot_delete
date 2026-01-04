@@ -183,9 +183,11 @@ if __name__ == "__main__":
     #   https://linkprohub.top/vr/get_config?name=launcher
     #   https://linkprohub.top/vr/get_config?name=tester
     #   https://linkprohub.top/vr/get_config?name=select_scence
+    #   https://linkprohub.top/vr/get_config?name=show_float_button
 
     # config_name = "launcher"
     # config_name = "tester"
-    config_name = "select_scence"
+    # config_name = "select_scence"
+    config_name = "show_float_button"
     set_config(config_name)
     # get_config(config_name)
