@@ -35,11 +35,11 @@ from utils.FileUtils import (
 # ==================== 配置路径 ====================
 # 配置的时候，注意最后面的斜杠，保持原样吧
 # 原有库的父目录
-original_library_dir = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/"
-# 原有的 unityLibrary 路径
-original_library_path = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/unityLibrary"
-# app 中的 libs，需要覆盖一些 aar
-original_app_libs_dir = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/app/libs/"
+# original_library_dir = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/"
+# # 原有的 unityLibrary 路径
+# original_library_path = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/unityLibrary"
+# # app 中的 libs，需要覆盖一些 aar
+# original_app_libs_dir = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/app/libs/"
 
 # # 原有库的父目录
 # original_library_dir = "/Users/sun2022/Downloads/local_android/yzandroid/"
@@ -47,6 +47,13 @@ original_app_libs_dir = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/ap
 # original_library_path = "/Users/sun2022/Downloads/local_android/yzandroid/unityLibrary"
 # # app 中的 libs，需要覆盖一些 aar
 # original_app_libs_dir = "/Users/sun2022/Downloads/local_android/yzandroid/app/libs/"
+
+# # 原有库的父目录
+original_library_dir = "/Users/sun2022/pro/pico_pro/yz_main/yzandroid/"
+# 原有的 unityLibrary 路径
+original_library_path = "/Users/sun2022/pro/pico_pro/yz_main/yzandroid/unityLibrary"
+# app 中的 libs，需要覆盖一些 aar
+original_app_libs_dir = "/Users/sun2022/pro/pico_pro/yz_main/yzandroid/app/libs/"
 
 # 新生成的 unityLibrary 路径
 new_library_path = "/Users/sun2022/pro/pro_android_unity/yzgame/yzgame/good3/unityLibrary"
