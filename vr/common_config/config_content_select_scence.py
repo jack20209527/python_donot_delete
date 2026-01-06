@@ -15,6 +15,7 @@ CONFIG_DATA = {
         "apiVersion": "v1"
     },
 
+    "pullIP": "192.168.10.49",
     "scenceList": [
         {
             "id": 0,

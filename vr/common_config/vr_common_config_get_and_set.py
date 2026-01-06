@@ -187,7 +187,7 @@ if __name__ == "__main__":
 
     # config_name = "launcher"
     # config_name = "tester"
-    # config_name = "select_scence"
-    config_name = "show_float_button"
+    config_name = "select_scence"
+    # config_name = "show_float_button"
     set_config(config_name)
     # get_config(config_name)
