@@ -15,7 +15,7 @@ CONFIG_DATA = {
         "apiVersion": "v1"
     },
 
-    "pullIP": "192.168.10.49",
+    "pullIP": "https://play.yizhizh.com/3DVR/3D.m3u8",
     "scenceList": [
         {
             "id": 0,
