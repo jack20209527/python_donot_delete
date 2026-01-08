@@ -8,13 +8,13 @@
 # ==================== 需要修改的配置 ====================
 
 # 1. 选择第几套签名配置（1、2、3）
-SIGN_CONFIG_INDEX = 2
+SIGN_CONFIG_INDEX = 1
 
 # 2. Android 工程根目录路径
 ANDROID_PROJECT_PATH = "/Users/sun2022/Downloads/local_android/yzandroid"
 
 # 3. 待拷贝的 UniApp 资源文件夹路径
-UNIAPP_SOURCE_PATH = "/Users/sun2022/Downloads/__UNI__0D35F8E"
+UNIAPP_SOURCE_PATH = "/Users/sun2022/Downloads/公司/__UNI__61B6203"
 
 # ==================== 以下是预置配置，一般不需要修改 ====================
 
@@ -22,7 +22,7 @@ UNIAPP_SOURCE_PATH = "/Users/sun2022/Downloads/__UNI__0D35F8E"
 SIGN_CONFIGS = [
     # 第1套：艺值字画商城
     {
-        "name": "艺值字画商城",
+        "name": "艺值",
         "package_name": "uni.yizhizh.com",
         "key_alias": "yizhizihua",
         "key_password": "yangyizhi",

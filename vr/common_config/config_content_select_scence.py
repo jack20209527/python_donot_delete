@@ -9,45 +9,65 @@ CONFIG_NAME = "select_scence"
 
 # 配置内容
 CONFIG_DATA = {
-    "version": "1",
-    "metadata": {
-        "lastUpdated": "2025-12-28",
-        "apiVersion": "v1"
-    },
-
     "pullIP": "https://play.yizhizh.com/3DVR/3D.m3u8",
     "scenceList": [
         {
             "id": 0,
             "name": "SpaceVideoPlayer",
-            "ext0": "",
-            "ext1": "",
-            "ext2": ""
         },
         {
             "id": 1,
             "name": "SpaceVideoPlayer_HLS",
-            "ext0": "",
-            "ext1": "",
-            "ext2": ""
         },
         {
             "id": 2,
             "name": "CubeDemo",
-            "ext0": "",
-            "ext1": "",
-            "ext2": ""
         },
         {
             "id": 3,
             "name": "SpaceVideoPLayer_new_ui",
-            "ext0": "",
-            "ext1": "",
-            "ext2": ""
         }
     ]
 }
 
-
+# CONFIG_DATA = {
+#     "version": "1",
+#     "metadata": {
+#         "lastUpdated": "2025-12-28",
+#         "apiVersion": "v1"
+#     },
+#
+#     "pullIP": "https://play.yizhizh.com/3DVR/3D.m3u8",
+#     "scenceList": [
+#         {
+#             "id": 0,
+#             "name": "SpaceVideoPlayer",
+#             "ext0": "",
+#             "ext1": "",
+#             "ext2": ""
+#         },
+#         {
+#             "id": 1,
+#             "name": "SpaceVideoPlayer_HLS",
+#             "ext0": "",
+#             "ext1": "",
+#             "ext2": ""
+#         },
+#         {
+#             "id": 2,
+#             "name": "CubeDemo",
+#             "ext0": "",
+#             "ext1": "",
+#             "ext2": ""
+#         },
+#         {
+#             "id": 3,
+#             "name": "SpaceVideoPLayer_new_ui",
+#             "ext0": "",
+#             "ext1": "",
+#             "ext2": ""
+#         }
+#     ]
+# }
 
 
