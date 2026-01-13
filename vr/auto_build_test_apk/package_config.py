@@ -28,7 +28,7 @@ SIGN_CONFIGS = [
         "key_password": "yangyizhi",
         "store_file": "yizhizihua.keystore",
         "store_password": "yangyizhi",
-        "keystore_source_path": "/Users/sun2022/Downloads/公司/yizhizihua.keystore",
+        "keystore_source_path": "/Users/sun2022/Downloads/公司/configs/keystore/yizhizihua.keystore",
         "dcloud_appkey": "614b26d2bb3cf002b0d3220190eb390b",
     },
     # 第2套：测试1
@@ -39,7 +39,7 @@ SIGN_CONFIGS = [
         "key_password": "20251218",
         "store_file": "yizhitech.keystore",
         "store_password": "20251218",
-        "keystore_source_path": "/Users/sun2022/Downloads/公司/yizhitech.keystore",
+        "keystore_source_path": "/Users/sun2022/Downloads/公司/configs/keystore/yizhitech.keystore",
         "dcloud_appkey": "555261490b6b6fbc1435fc49248d88a8",
     },
     # 第3套：测试2
@@ -50,7 +50,7 @@ SIGN_CONFIGS = [
         "key_password": "20251219",
         "store_file": "yizhitest.keystore",
         "store_password": "20251219",
-        "keystore_source_path": "/Users/sun2022/Downloads/公司/yizhitest.keystore",
+        "keystore_source_path": "/Users/sun2022/Downloads/公司/configs/keystore/yizhitest.keystore",
         "dcloud_appkey": "b9313e28da4b79d9fc798469b343cd3d",
     },
 ]
