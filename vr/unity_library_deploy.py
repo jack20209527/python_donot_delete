@@ -14,13 +14,12 @@ Unity Library 部署脚本
     (2)保留unity-classes.jar不动
     (3)剪切其余的jar文件和aar文件到我给你的original_app_libs_dir这个变量指定的目录下，也就是可以先给original_app_libs_dir路径下的你需要剪切的文件删除，再给需要剪切的文件拷贝过来
 4. 给 library2 中的 build.gradle的全部内容 整体拷贝到 library中的build.gradle文件中
-5. 注释新库unityLibrary AndroidManifest.xml 中的 <activity>...</activity> 标签
+5. 替换新库 unityLibrary AndroidManifest.xml 文件：删除原文件，从 android_manifest_xml_path 拷贝新文件
 6. 替换 com 包内容：删除新库 com/ 下所有内容，拷贝旧库 com/ 下所有内容到新库
 
 """
 
 import os
-import re
 import sys
 import shutil
 
@@ -32,14 +31,21 @@ from utils.FileUtils import (
     delete_folder
 )
 
+#==================================================
+is_online_old_manifest_config = 1 # 1: 线上配置配置，干净的没有蓝牙的配置；   0: 新配置，有蓝牙配置，
+
+android_manifest_xml_path = "/Users/sun2022/Downloads/公司/configs/manifest_online/AndroidManifest.xml"
+if (is_online_old_manifest_config != 1) :
+    android_manifest_xml_path = "/Users/sun2022/Downloads/公司/configs/manifest_new_all/AndroidManifest.xml"
+
 # ==================== 配置路径 ====================
 # 配置的时候，注意最后面的斜杠，保持原样吧
 # 原有库的父目录
-# original_library_dir = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/"
-# # 原有的 unityLibrary 路径
-# original_library_path = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/unityLibrary"
-# # app 中的 libs，需要覆盖一些 aar
-# original_app_libs_dir = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/app/libs/"
+original_library_dir = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/"
+# 原有的 unityLibrary 路径
+original_library_path = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/unityLibrary"
+# app 中的 libs，需要覆盖一些 aar
+original_app_libs_dir = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/app/libs/"
 
 # # 原有库的父目录
 # original_library_dir = "/Users/sun2022/Downloads/local_android/yzandroid/"
@@ -49,11 +55,11 @@ from utils.FileUtils import (
 # original_app_libs_dir = "/Users/sun2022/Downloads/local_android/yzandroid/app/libs/"
 
 # # 原有库的父目录
-original_library_dir = "/Users/sun2022/pro/pico_pro/yz_main/yzandroid/"
-# 原有的 unityLibrary 路径
-original_library_path = "/Users/sun2022/pro/pico_pro/yz_main/yzandroid/unityLibrary"
-# app 中的 libs，需要覆盖一些 aar
-original_app_libs_dir = "/Users/sun2022/pro/pico_pro/yz_main/yzandroid/app/libs/"
+# original_library_dir = "/Users/sun2022/pro/pico_pro/yz_main/yzandroid/"
+# # 原有的 unityLibrary 路径
+# original_library_path = "/Users/sun2022/pro/pico_pro/yz_main/yzandroid/unityLibrary"
+# # app 中的 libs，需要覆盖一些 aar
+# original_app_libs_dir = "/Users/sun2022/pro/pico_pro/yz_main/yzandroid/app/libs/"
 
 # 新生成的 unityLibrary 路径
 new_library_path = "/Users/sun2022/pro/pro_android_unity/yzgame/yzgame/good3/unityLibrary"
@@ -82,28 +88,6 @@ def log_info(message: str):
     """打印信息日志"""
     print(f"💡 {message}")
 
-
-def comment_activity_block(manifest_content: str) -> str:
-    """
-    将 AndroidManifest.xml 内容中的 <activity>...</activity> 标签块用 XML 注释包裹。
-
-    参数:
-        manifest_content (str): AndroidManifest.xml 的完整内容
-
-    返回:
-        str: 处理后的 AndroidManifest.xml 内容
-    """
-    # 使用正则表达式匹配 <activity 开始到 </activity> 结束的内容
-    # re.DOTALL 让 . 匹配换行符
-    pattern = r'(<activity[^>]*>.*?</activity>)'
-
-    def replace_with_comment(match):
-        activity_block = match.group(1)
-        # 用 XML 注释包裹
-        return f"<!--\n{activity_block}\n-->"
-
-    result = re.sub(pattern, replace_with_comment, manifest_content, flags=re.DOTALL)
-    return result
 
 def step0_cleanup_old_unity_library2() -> bool:
     """
@@ -353,40 +337,45 @@ def step4_replace_build_gradle(unity_library2_path: str) -> bool:
 
 def step5_comment_activity_in_manifest() -> bool:
     """
-    步骤5: 注释新库 AndroidManifest.xml 中的 <activity>...</activity> 标签
+    步骤5: 替换 AndroidManifest.xml 文件
+    删除原有的 AndroidManifest.xml，从 android_manifest_xml_path 拷贝新文件
 
     返回:
         bool: 成功返回 True，失败返回 False
     """
-    log_step(5, "注释 AndroidManifest.xml 中的 <activity> 标签")
+    log_step(5, "替换 AndroidManifest.xml 文件")
 
     # 构造清单文件路径
     manifest_path = os.path.join(original_library_dir, "unityLibrary/src/main/AndroidManifest.xml")
 
-    log_info(f"清单文件路径: {manifest_path}")
+    log_info(f"目标清单文件路径: {manifest_path}")
+    log_info(f"源清单文件路径: {android_manifest_xml_path}")
 
-    # 检查文件是否存在
-    if not os.path.exists(manifest_path):
-        log_error(f"清单文件不存在: {manifest_path}")
+    # 检查源文件是否存在
+    if not os.path.exists(android_manifest_xml_path):
+        log_error(f"源清单文件不存在: {android_manifest_xml_path}")
         return False
 
+    # 检查目标文件是否存在，如果存在则删除
+    if os.path.exists(manifest_path):
+        try:
+            log_info("正在删除原有的 AndroidManifest.xml 文件...")
+            os.remove(manifest_path)
+            print(f"  🗑️ 删除文件: {manifest_path}")
+        except Exception as e:
+            log_error(f"删除原有清单文件失败: {e}")
+            return False
+
     try:
-        # 读取清单文件
-        with open(manifest_path, 'r', encoding='utf-8') as f:
-            manifest_content = f.read()
-
-        # 注释 activity 标签块
-        modified_content = comment_activity_block(manifest_content)
-
-        # 写入清单文件
-        with open(manifest_path, 'w', encoding='utf-8') as f:
-            f.write(modified_content)
-
-        log_success("AndroidManifest.xml 中的 <activity> 标签已注释")
+        # 拷贝新的清单文件
+        log_info("正在拷贝新的 AndroidManifest.xml 文件...")
+        shutil.copy2(android_manifest_xml_path, manifest_path)
+        print(f"  📄 拷贝文件: {android_manifest_xml_path} -> {manifest_path}")
+        log_success("AndroidManifest.xml 文件替换成功")
         return True
 
     except Exception as e:
-        log_error(f"注释 AndroidManifest.xml 时发生错误: {e}")
+        log_error(f"替换 AndroidManifest.xml 时发生错误: {e}")
         return False
 
 
@@ -517,7 +506,7 @@ def main():
     print(f"   ✅ 新库已部署到: {os.path.join(original_library_dir, 'unityLibrary')}")
     print(f"   ✅ 已整理 libs 文件夹（删除 debug.aar，剪切其他到 app/libs）")
     print(f"   ✅ 已全量替换 build.gradle 文件")
-    print(f"   ✅ 已注释 AndroidManifest.xml 中的 <activity> 标签")
+    print(f"   ✅ 已替换 AndroidManifest.xml 文件")
     print(f"   ✅ 已替换 com 包内容")
 
 
