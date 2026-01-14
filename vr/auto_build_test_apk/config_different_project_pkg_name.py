@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-包名修改工具 - 主程序
+包名修改工具: 主要是需要配置正式包、测试VR包、测试商城包，需要配置不同的包名和修改清单文件
 功能：
 1. 修改 build.gradle 中的包名（namespace 和 applicationId）
 2. 拷贝 keystore 文件到 app 目录，修改签名配置
@@ -11,14 +11,14 @@
 6. 修改 AndroidManifest.xml 中的 dcloud_appkey
 
 使用方法：
-1. 先修改 package_config.py 中的配置
-2. 运行此脚本：python3 change_package.py
+1. 先修改 project_pkg_config.py 中的配置
+2. 运行此脚本：python3 config_different_project_pkg_name.py
 """
 
 import os
 import re
 import shutil
-from package_config import (
+from project_pkg_config import (
     SIGN_CONFIG_INDEX,
     ANDROID_PROJECT_PATH,
     UNIAPP_SOURCE_PATH,

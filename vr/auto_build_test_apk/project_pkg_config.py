@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 包名修改工具 - 配置文件
-修改下面的配置后，运行 change_package.py 即可
+修改下面的配置后，运行 config_different_project_pkg_name.py 即可
 """
 
 # ==================== 需要修改的配置 ====================
@@ -11,10 +11,12 @@
 SIGN_CONFIG_INDEX = 2
 
 # 2. Android 工程根目录路径
-ANDROID_PROJECT_PATH = "/Users/sun2022/pro/pico_pro/yz_main/yzandroid"
+# ANDROID_PROJECT_PATH = "/Users/sun2022/pro/pico_pro/yz_main/yzandroid"
+ANDROID_PROJECT_PATH = "/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid"
 
 # 3. 待拷贝的 UniApp 资源文件夹路径
-UNIAPP_SOURCE_PATH = "/Users/sun2022/Downloads/公司/__UNI__0D35F8E"
+# UNIAPP_SOURCE_PATH = "/Users/sun2022/Downloads/公司/__UNI__0D35F8E"
+UNIAPP_SOURCE_PATH = "/Users/sun2022/Downloads/__UNI__0D35F8E"
 
 # ==================== 以下是预置配置，一般不需要修改 ====================
 
