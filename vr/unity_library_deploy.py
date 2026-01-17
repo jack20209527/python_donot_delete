@@ -314,6 +314,7 @@ def step4_replace_build_gradle(unity_library2_path: str) -> bool:
         log_error(f"源 build.gradle 不存在: {old_gradle_path}")
         return False
 
+    log_info(f"文件是否存在: {os.path.exists(new_gradle_path)}")
     if not os.path.exists(new_gradle_path):
         log_error(f"目标 build.gradle 不存在: {new_gradle_path}")
         return False
@@ -512,3 +513,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+    # exist = os.path.exists("/Users/sun2022/pro/pico_pro/yz_test_branch/yzandroid/unityLibrary/build.gradle")
+    # print(exist)
+
